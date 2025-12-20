@@ -1,0 +1,35 @@
+search:
+  limit_per_query: 50
+  buying_options: ["FIXED_PRICE", "AUCTION"]
+  queries:
+    - '"crashes under load" gpu'
+    - '"shuts down under load" gpu'
+    - '"overheats" gpu'
+    - '"thermal shutdown" gpu'
+    - '"green screen" gpu'
+    - '"black screen after" gpu'
+    - '"fails furmark" gpu'
+    - '"furmark" gpu crash'
+    - '"blue screen" gpu'
+    - '"bsod" gpu'
+    - '"driver crash" gpu'
+    - '"works on desktop" gpu'
+    - '"boots" gpu crashes'
+
+thresholds:
+  min_score_alert: 75
+  min_expected_profit: 80
+  max_price: 400
+  max_results_print: 25
+
+assumptions:
+  ebay_fee_rate: 0.135
+  shipping_cost_default: 18
+  parts_cost_default: 18
+  time_cost_default: 30
+  p_fix_green: 0.65
+  p_fix_yellow: 0.35
+  p_fix_red: 0.10
+
+db:
+  path: "scanner.sqlite"
