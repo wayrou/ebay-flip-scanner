@@ -1,35 +1,136 @@
-search:
-  limit_per_query: 50
-  buying_options: ["FIXED_PRICE", "AUCTION"]
-  queries:
-    - '"crashes under load" gpu'
-    - '"shuts down under load" gpu'
-    - '"overheats" gpu'
-    - '"thermal shutdown" gpu'
-    - '"green screen" gpu'
-    - '"black screen after" gpu'
-    - '"fails furmark" gpu'
-    - '"furmark" gpu crash'
-    - '"blue screen" gpu'
-    - '"bsod" gpu'
-    - '"driver crash" gpu'
-    - '"works on desktop" gpu'
-    - '"boots" gpu crashes'
+defaults:
+  search:
+    limit_per_query: 35
+    buying_options: ["FIXED_PRICE", "AUCTION"]
+  thresholds:
+    min_score_alert: 60
+    min_expected_profit: 25
+    max_results_print: 10
+  assumptions:
+    ebay_fee_rate: 0.135
 
-thresholds:
-  min_score_alert: 75
-  min_expected_profit: 80
-  max_price: 400
-  max_results_print: 25
+markets:
+  - key: "gpu"
+    display_name: "GPUs"
+    comps_path: "data/comps/gpus.csv"
+    search:
+      category_ids: ["27386"]
+      queries:
+        - "gpu crash"
+        - "gpu artifact"
+        - "gpu artifacts"
+        - "graphics card artifact"
+        - "gpu no display"
+        - "rtx no display"
+        - "gtx no display"
+        - "rx no display"
+        - "gpu not detected"
+        - "graphics card not working"
+        - "gpu for parts"
+    thresholds:
+      min_score_alert: 65
+      min_expected_profit: 25
+      max_price: 400
+      max_results_print: 15
+    assumptions:
+      shipping_cost_default: 18
+      parts_cost_default: 18
+      time_cost_default: 30
+      p_fix_green: 0.65
+      p_fix_yellow: 0.35
+      p_fix_red: 0.10
 
-assumptions:
-  ebay_fee_rate: 0.135
-  shipping_cost_default: 18
-  parts_cost_default: 18
-  time_cost_default: 30
-  p_fix_green: 0.65
-  p_fix_yellow: 0.35
-  p_fix_red: 0.10
+  - key: "graphing_calculator"
+    display_name: "Graphing Calculators"
+    comps_path: "data/comps/graphing_calculators.csv"
+    search:
+      queries:
+        - "TI-84 Plus CE not working"
+        - "TI-Nspire CX II not working"
+        - "graphing calculator lines on screen"
+        - "graphing calculator for parts"
+        - "graphing calculator won't turn on"
+    thresholds:
+      min_expected_profit: 20
+      max_price: 140
+      max_results_print: 8
+    assumptions:
+      shipping_cost_default: 8
+      parts_cost_default: 8
+      time_cost_default: 20
+      p_fix_green: 0.75
+      p_fix_yellow: 0.45
+      p_fix_red: 0.15
+
+  - key: "premium_headphones"
+    display_name: "Premium Headphones"
+    comps_path: "data/comps/premium_headphones.csv"
+    search:
+      queries:
+        - "WH-1000XM4 not working"
+        - "Bose QC45 not working"
+        - "Sony Bose headphones one side not working"
+        - "Sony Bose headphones hinge broken"
+        - "premium headphones for parts"
+    thresholds:
+      min_expected_profit: 20
+      max_price: 250
+      max_results_print: 8
+    assumptions:
+      shipping_cost_default: 10
+      parts_cost_default: 12
+      time_cost_default: 20
+      p_fix_green: 0.70
+      p_fix_yellow: 0.40
+      p_fix_red: 0.10
+
+  - key: "handheld_console"
+    display_name: "Handheld Consoles"
+    comps_path: "data/comps/handheld_consoles.csv"
+    search:
+      queries:
+        - "Nintendo Switch not working"
+        - "Nintendo Switch for parts"
+        - "Nintendo Switch won't charge"
+        - "3DS XL for parts"
+        - "PS Vita not working"
+    thresholds:
+      min_expected_profit: 25
+      max_price: 180
+      max_results_print: 8
+    assumptions:
+      shipping_cost_default: 10
+      parts_cost_default: 12
+      time_cost_default: 25
+      p_fix_green: 0.70
+      p_fix_yellow: 0.40
+      p_fix_red: 0.10
+
+  - key: "camera_lens"
+    display_name: "Camera Lenses"
+    comps_path: "data/comps/camera_lenses.csv"
+    search:
+      queries:
+        - "Canon lens autofocus not working"
+        - "Canon lens for parts"
+        - "Sony lens not working"
+        - "Sigma lens autofocus not working"
+        - "camera lens fungus"
+    thresholds:
+      min_expected_profit: 25
+      max_price: 200
+      max_results_print: 8
+    assumptions:
+      shipping_cost_default: 12
+      parts_cost_default: 18
+      time_cost_default: 30
+      p_fix_green: 0.65
+      p_fix_yellow: 0.35
+      p_fix_red: 0.10
 
 db:
   path: "scanner.sqlite"
+
+runtime:
+  scan_interval_minutes: 15
+  min_hours_between_alerts: 24

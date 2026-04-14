@@ -1,0 +1,410 @@
+from dataclasses import dataclass
+from typing import Dict, Tuple
+
+
+@dataclass(frozen=True)
+class MarketProfile:
+    key: str
+    display_name: str
+    context_patterns: Tuple[str, ...]
+    accessory_reject_patterns: Tuple[str, ...] = ()
+    alive_patterns: Tuple[str, ...] = ()
+    issue_patterns: Tuple[str, ...] = ()
+    repair_listing_patterns: Tuple[str, ...] = ()
+    vague_patterns: Tuple[str, ...] = ()
+    hard_reject_patterns: Tuple[str, ...] = ()
+    no_output_patterns: Tuple[str, ...] = ()
+    damage_patterns: Tuple[str, ...] = ()
+
+
+COMMON_REPAIR_LISTING_PATTERNS = (
+    r"\bnot working\b",
+    r"\bfor parts\b",
+    r"\bparts\s*/\s*repair\b",
+    r"\brepair\b",
+    r"\bbroken\b",
+    r"\bas[-\s]?is\b",
+)
+
+COMMON_VAGUE_PATTERNS = (
+    r"\buntested\b",
+    r"\bunknown\b",
+    r"\bno returns\b",
+    r"\bparts\b",
+)
+
+COMMON_DAMAGE_PATTERNS = (
+    r"\bcorrosion\b",
+    r"\brust\b",
+    r"\bliquid\b",
+    r"\bwater\b",
+    r"\bspill\b",
+    r"\bfire damage\b",
+)
+
+COMMON_SERVICE_REJECTS = (
+    r"\brepair service\b",
+    r"\bmail[-\s]?in\b",
+    r"\bsend[-\s]?in\b",
+)
+
+
+MARKET_PROFILES: Dict[str, MarketProfile] = {
+    "gpu": MarketProfile(
+        key="gpu",
+        display_name="GPUs",
+        context_patterns=(
+            r"\bgeforce\b",
+            r"\brtx\b",
+            r"\bgtx\b",
+            r"\bradeon\b",
+            r"\brx\s?\d{3,4}\b",
+            r"\bquadro\b",
+            r"\btitan\b",
+            r"\bgraphics card\b",
+            r"\bvideo card\b",
+            r"\bpcie\b",
+            r"\bpci express\b",
+        ),
+        accessory_reject_patterns=(
+            r"\bthermal pad(s)?\b",
+            r"\bthermal paste\b",
+            r"\bheatsink\b",
+            r"\bbackplate\b",
+            r"\briser\b",
+            r"\bpcie riser\b",
+            r"\bwaterblock\b",
+            r"\bfan replacement\b",
+            r"\bmount\b",
+            r"\bbracket\b",
+            r"\bcable\b",
+            r"\badapter\b",
+        ),
+        alive_patterns=(
+            r"\bboots?\b",
+            r"\bposts?\b",
+            r"\bdisplays?\b",
+            r"\bdisplay output\b",
+            r"\bworks in windows\b",
+            r"\bdriver(s)? (install|installs|installed)\b",
+            r"\bdevice manager\b",
+            r"\bpowers?\s+on\b",
+            r"\bfans?\s+spin\b",
+        ),
+        issue_patterns=(
+            r"\boverheat\w*\b",
+            r"\bthermal\b",
+            r"\bthermal shutdown\b",
+            r"\bshuts?\s+down\b",
+            r"\bcrash(es|ed|ing)?\b.*\b(load|game|gaming|stress)\b",
+            r"\bfails?\b.*\bfurmark\b",
+            r"\bfails?\b.*\bstress\b",
+            r"\bfurmark\b",
+            r"\bbsod\b",
+            r"\bblue screen\b",
+            r"\bgreen screen\b",
+            r"\bblack screen after\b",
+            r"\bartifact(s|ing)?\b",
+        ),
+        repair_listing_patterns=COMMON_REPAIR_LISTING_PATTERNS,
+        vague_patterns=COMMON_VAGUE_PATTERNS,
+        hard_reject_patterns=COMMON_SERVICE_REJECTS
+        + (
+            r"\bcracked pcb\b",
+            r"\bbroken pcb\b",
+            r"\bmissing gpu\b",
+            r"\bno core\b",
+            r"\bno vram\b",
+            r"\bmissing core\b",
+            r"\bmissing vram\b",
+            r"\bno accessible display ports\b",
+        ),
+        no_output_patterns=(
+            r"\bno display\b",
+            r"\bno video\b",
+            r"\bno signal\b",
+            r"\bnot detected\b",
+            r"\bdoesn'?t post\b",
+            r"\bno post\b",
+        ),
+        damage_patterns=COMMON_DAMAGE_PATTERNS,
+    ),
+    "graphing_calculator": MarketProfile(
+        key="graphing_calculator",
+        display_name="Graphing Calculators",
+        context_patterns=(
+            r"\bti[-\s]?84\b",
+            r"\bti[-\s]?83\b",
+            r"\bti[-\s]?nspire\b",
+            r"\bhp prime\b",
+            r"\bfx[-\s]?cg50\b",
+            r"\bgraphing calculator\b",
+        ),
+        accessory_reject_patterns=(
+            r"\bcase only\b",
+            r"\bcover only\b",
+            r"\bstylus only\b",
+            r"\bcharger only\b",
+            r"\bcable only\b",
+            r"\bbattery door\b",
+            r"\bmanual only\b",
+            r"\bscreen protector\b",
+        ),
+        alive_patterns=(
+            r"\bturns?\s+on\b",
+            r"\bpowers?\s+on\b",
+            r"\bboots?\b",
+            r"\bcharges?\b",
+            r"\bscreen works\b",
+            r"\bhome screen\b",
+            r"\bmenu\b",
+        ),
+        issue_patterns=(
+            r"\blines?\s+on\s+screen\b",
+            r"\bdead pixel(s)?\b",
+            r"\bmissing lines?\b",
+            r"\bvertical lines?\b",
+            r"\bhorizontal lines?\b",
+            r"\bbuttons?\b.*\b(not working|don'?t work|stuck)\b",
+            r"\bwon'?t charge\b",
+            r"\bcharging issue\b",
+            r"\bbattery issue\b",
+            r"\bbattery compartment\b",
+            r"\bblank screen\b",
+            r"\bfaded screen\b",
+            r"\busb port\b",
+        ),
+        repair_listing_patterns=COMMON_REPAIR_LISTING_PATTERNS,
+        vague_patterns=COMMON_VAGUE_PATTERNS,
+        hard_reject_patterns=COMMON_SERVICE_REJECTS
+        + (
+            r"\bbox only\b",
+            r"\bcase only\b",
+            r"\breplacement shell\b",
+            r"\bempty box\b",
+        ),
+        no_output_patterns=(
+            r"\bwon'?t turn on\b",
+            r"\bno power\b",
+            r"\bdoesn'?t power on\b",
+            r"\bdead\b",
+        ),
+        damage_patterns=COMMON_DAMAGE_PATTERNS + (r"\bcracked board\b",),
+    ),
+    "premium_headphones": MarketProfile(
+        key="premium_headphones",
+        display_name="Premium Headphones",
+        context_patterns=(
+            r"\bwh[-\s]?1000xm[345]\b",
+            r"\bqc[-\s]?35\b",
+            r"\bqc[-\s]?45\b",
+            r"\bbose 700\b",
+            r"\bnoise cancelling 700\b",
+            r"\bairpods max\b",
+            r"\bbeats studio3\b",
+            r"\bheadphones?\b",
+        ),
+        accessory_reject_patterns=(
+            r"\bear pad(s)?\b",
+            r"\bear cushion(s)?\b",
+            r"\bcase only\b",
+            r"\bcable only\b",
+            r"\bcharging cable only\b",
+            r"\baux cable only\b",
+            r"\bheadband cover\b",
+            r"\breplacement battery\b",
+            r"\bstand\b",
+        ),
+        alive_patterns=(
+            r"\bturns?\s+on\b",
+            r"\bpowers?\s+on\b",
+            r"\bcharges?\b",
+            r"\bbluetooth\b",
+            r"\bpairs?\b",
+            r"\bconnects?\b",
+        ),
+        issue_patterns=(
+            r"\bone side\b",
+            r"\bleft side\b",
+            r"\bright side\b",
+            r"\bno sound\b",
+            r"\bstatic\b",
+            r"\bcrackl\w*\b",
+            r"\bhinge\b",
+            r"\bwon'?t charge\b",
+            r"\bnot charging\b",
+            r"\bbattery drains?\b",
+            r"\bheadband cracked\b",
+        ),
+        repair_listing_patterns=COMMON_REPAIR_LISTING_PATTERNS,
+        vague_patterns=COMMON_VAGUE_PATTERNS,
+        hard_reject_patterns=COMMON_SERVICE_REJECTS
+        + (
+            r"\bfake\b",
+            r"\breplica\b",
+            r"\bempty box\b",
+            r"\bbox only\b",
+            r"\bear pad(s)? only\b",
+        ),
+        no_output_patterns=(
+            r"\bwon'?t turn on\b",
+            r"\bno power\b",
+            r"\bdead\b",
+            r"\bdoesn'?t charge\b",
+        ),
+        damage_patterns=COMMON_DAMAGE_PATTERNS,
+    ),
+    "handheld_console": MarketProfile(
+        key="handheld_console",
+        display_name="Handheld Consoles",
+        context_patterns=(
+            r"\bnintendo switch\b",
+            r"\bswitch lite\b",
+            r"\bswitch oled\b",
+            r"\b3ds xl\b",
+            r"\bnew 3ds\b",
+            r"\bps vita\b",
+            r"\bpsvita\b",
+            r"\bpch[-\s]?(1000|1100|2000|2001)\b",
+            r"\bpsp[-\s]?3000\b",
+            r"\bsteam deck\b",
+            r"\bhandheld console\b",
+        ),
+        accessory_reject_patterns=(
+            r"\bdock only\b",
+            r"\bcharging dock only\b",
+            r"\bjoy[-\s]?con pair\b",
+            r"\bjoy[-\s]?con only\b",
+            r"\bshell\b",
+            r"\bhousing\b",
+            r"\bcharger only\b",
+            r"\bcharging cable only\b",
+            r"\bpower cable only\b",
+            r"\bkickstand\b",
+            r"\bmotherboard\b",
+            r"\blogic board\b",
+            r"\blcd\b",
+            r"\bscreen replacement\b",
+            r"\bcharging port\b",
+            r"\bport replacement\b",
+            r"\bback cover\b",
+            r"\breplacement part\b",
+        ),
+        alive_patterns=(
+            r"\bturns?\s+on\b",
+            r"\bpowers?\s+on\b",
+            r"\bboots?\b",
+            r"\bcharges?\b",
+            r"\breads?\s+games?\b",
+            r"\bgame card\b",
+            r"\bhome screen\b",
+            r"\bmenu\b",
+        ),
+        issue_patterns=(
+            r"\bwon'?t charge\b",
+            r"\bcharge port\b",
+            r"\bcharging issue\b",
+            r"\bblue screen\b",
+            r"\bblack screen\b",
+            r"\blines?\s+on\s+screen\b",
+            r"\bdoesn'?t read\b",
+            r"\bgame card\b.*\b(not working|won'?t read|doesn'?t read)\b",
+            r"\bstick drift\b",
+            r"\bno sound\b",
+            r"\bbad battery\b",
+            r"\bbattery issue\b",
+            r"\btouch screen\b",
+        ),
+        repair_listing_patterns=COMMON_REPAIR_LISTING_PATTERNS,
+        vague_patterns=COMMON_VAGUE_PATTERNS,
+        hard_reject_patterns=COMMON_SERVICE_REJECTS
+        + (
+            r"\btablet only\b",
+            r"\bempty box\b",
+            r"\bbox only\b",
+            r"\bfor repair service\b",
+        ),
+        no_output_patterns=(
+            r"\bwon'?t turn on\b",
+            r"\bno power\b",
+            r"\bdead\b",
+            r"\bdoesn'?t power on\b",
+        ),
+        damage_patterns=COMMON_DAMAGE_PATTERNS,
+    ),
+    "camera_lens": MarketProfile(
+        key="camera_lens",
+        display_name="Camera Lenses",
+        context_patterns=(
+            r"\blens\b",
+            r"\bcanon ef\b",
+            r"\bcanon rf\b",
+            r"\bsony fe\b",
+            r"\be[-\s]?mount\b",
+            r"\bnikon\b",
+            r"\bsigma\b",
+            r"\btamron\b",
+            r"\b24[-\s]?70mm\b",
+            r"\b28[-\s]?75mm\b",
+        ),
+        accessory_reject_patterns=(
+            r"\badapter\b",
+            r"\bmount adapter\b",
+            r"\bfilter\b",
+            r"\bhood\b",
+            r"\blens cap\b",
+            r"\bfront cap\b",
+            r"\brear cap\b",
+            r"\btripod collar\b",
+            r"\bcase only\b",
+            r"\bbag only\b",
+            r"\bbox only\b",
+            r"\breplacement part\b",
+            r"\bflex cable\b",
+            r"\baperture unit\b",
+        ),
+        alive_patterns=(
+            r"\bmanual focus\b",
+            r"\bmounts?\b",
+            r"\bcamera recognizes\b",
+            r"\bglass clean\b",
+            r"\belectronics work\b",
+        ),
+        issue_patterns=(
+            r"\baf not working\b",
+            r"\bautofocus not working\b",
+            r"\bmanual focus only\b",
+            r"\bfocus issue\b",
+            r"\bfungus\b",
+            r"\bhaze\b",
+            r"\baperture\b",
+            r"\berror 01\b",
+            r"\bzoom ring\b",
+            r"\bfocus ring\b",
+            r"\bstuck\b",
+            r"\bnot communicating\b",
+            r"\bdoesn'?t communicate\b",
+        ),
+        repair_listing_patterns=COMMON_REPAIR_LISTING_PATTERNS,
+        vague_patterns=COMMON_VAGUE_PATTERNS,
+        hard_reject_patterns=COMMON_SERVICE_REJECTS
+        + (
+            r"\brepair part\b",
+            r"\bfor display\b",
+            r"\bempty box\b",
+        ),
+        no_output_patterns=(
+            r"\bdead\b",
+            r"\bnot detected\b",
+            r"\bno communication\b",
+        ),
+        damage_patterns=COMMON_DAMAGE_PATTERNS + (r"\bfungus\b", r"\bhaze\b"),
+    ),
+}
+
+
+def get_market_profile(profile_key: str) -> MarketProfile:
+    try:
+        return MARKET_PROFILES[profile_key]
+    except KeyError as exc:
+        raise KeyError(f"Unknown market profile: {profile_key}") from exc

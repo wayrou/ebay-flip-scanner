@@ -9,8 +9,12 @@ TOKEN_URL = "https://api.ebay.com/identity/v1/oauth2/token"
 
 class EbayOAuth:
     def __init__(self):
-        self.client_id = os.environ["EBAY_CLIENT_ID"]
-        self.client_secret = os.environ["EBAY_CLIENT_SECRET"]
+        self.client_id = os.getenv("EBAY_CLIENT_ID")
+        self.client_secret = os.getenv("EBAY_CLIENT_SECRET")
+        if not self.client_id or not self.client_secret:
+            raise RuntimeError(
+                "Missing EBAY_CLIENT_ID or EBAY_CLIENT_SECRET. Set them in .env or your environment."
+            )
         self._token = None
         self._exp = 0
 
@@ -29,7 +33,13 @@ class EbayOAuth:
         data = {"grant_type": "client_credentials", "scope": scope}
 
         r = requests.post(TOKEN_URL, headers=headers, data=data, timeout=30)
-        r.raise_for_status()
+        try:
+            r.raise_for_status()
+        except requests.HTTPError as exc:
+            body = r.text.strip()
+            if body:
+                raise requests.HTTPError(f"{exc} | eBay token response: {body[:500]}") from exc
+            raise
         payload = r.json()
 
         self._token = payload["access_token"]

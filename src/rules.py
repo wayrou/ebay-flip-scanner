@@ -1,72 +1,45 @@
 import re
 
-GPU_CONTEXT_STRONG = [
-    r"\bgeforce\b", r"\brtx\b", r"\bgtx\b",
-    r"\bradeon\b", r"\brx\s?\d{3,4}\b",
-    r"\bquadro\b", r"\btitan\b",
-    r"\bgraphics card\b", r"\bvideo card\b",
-    r"\bpcie\b", r"\bpci express\b"
-]
+from market_profiles import get_market_profile
 
-ACCESSORY_REJECT = [
-    r"\bthermal pad(s)?\b", r"\bthermal paste\b", r"\bheatsink\b",
-    r"\bbackplate\b", r"\briser\b", r"\bpcie riser\b",
-    r"\bwaterblock\b", r"\bfan replacement\b", r"\bmount\b",
-    r"\bbracket\b", r"\bcable\b", r"\badapter\b"
-]
 
-# IMPORTANT: We do NOT hard-reject "no display" universally, because some sellers say
-# "black screen after driver" (which can be salvageable). We'll treat "no display" as a big penalty in scoring,
-# and rules-based GREEN will require "alive" words anyway.
-VAGUE = [r"\buntested\b", r"\bas[-\s]?is\b", r"\bunknown\b", r"\bno returns\b", r"\bparts\b"]
+def _normalize_text(text: str) -> str:
+    return (text or "").lower().replace("’", "'").replace("`", "'")
 
-GREEN_ALIVE = [
-    r"\bboots?\b", r"\bposts?\b", r"\bdisplays?\b", r"\bdisplay output\b",
-    r"\bworks in windows\b", r"\bdriver(s)? (install|installs|installed)\b",
-    r"\bdevice manager\b"
-]
-
-GREEN_THERMAL = [
-    r"\boverheat\w*\b", r"\bthermal\b", r"\bthermal shutdown\b",
-    r"\bshuts?\s+down\b",
-    r"\bcrash(es|ed|ing)?\b.*\b(load|game|gaming|stress)\b",
-    r"\bfails?\b.*\bfurmark\b", r"\bfails?\b.*\bstress\b",
-    r"\bfurmark\b",
-    r"\bbsod\b|\bblue screen\b",
-    r"\bgreen screen\b|\bblack screen after\b"
-]
 
 def _match_any(patterns, text):
-    return any(re.search(p, text) for p in patterns)
+    return any(re.search(pattern, text) for pattern in patterns)
 
-def classify(text: str):
-    t = text.lower()
-    
-        # Reject accessories immediately
-    if any(re.search(p, t) for p in ACCESSORY_REJECT):
-        return "RED", ["accessory_not_gpu"]
 
-    # Must look like an actual graphics card listing (strong evidence)
-    if not any(re.search(p, t) for p in GPU_CONTEXT_STRONG):
-        return "RED", ["not_gpu_card_context"]
+def classify(text: str, profile_key: str = "gpu"):
+    profile = get_market_profile(profile_key)
+    normalized_text = _normalize_text(text)
 
-    if not _match_any(GPU_CONTEXT, t):
-        return "RED", ["not_gpu_context"]
+    if profile.accessory_reject_patterns and _match_any(profile.accessory_reject_patterns, normalized_text):
+        return "RED", ["accessory_or_part_only"]
 
-    if _match_any(HARD_REJECT, t):
+    if profile.context_patterns and not _match_any(profile.context_patterns, normalized_text):
+        return "RED", ["wrong_market_context"]
+
+    if profile.hard_reject_patterns and _match_any(profile.hard_reject_patterns, normalized_text):
         return "RED", ["hard_reject_keyword"]
 
-    alive = _match_any(GREEN_ALIVE, t)
-    thermal = _match_any(GREEN_THERMAL, t)
-    vague = _match_any(VAGUE, t)
+    if profile.damage_patterns and _match_any(profile.damage_patterns, normalized_text):
+        return "RED", ["damage_keyword"]
 
-    if alive and thermal:
-        return "GREEN", ["alive", "thermal_load_failure"]
+    no_output = profile.no_output_patterns and _match_any(profile.no_output_patterns, normalized_text)
+    alive = (not no_output) and profile.alive_patterns and _match_any(profile.alive_patterns, normalized_text)
+    issue = profile.issue_patterns and _match_any(profile.issue_patterns, normalized_text)
+    repair_listing = profile.repair_listing_patterns and _match_any(profile.repair_listing_patterns, normalized_text)
+    vague = profile.vague_patterns and _match_any(profile.vague_patterns, normalized_text)
 
-    if thermal and not alive:
-        return "YELLOW", ["thermal_language_no_alive_confirm"]
+    if alive and issue:
+        return "GREEN", ["alive", "repairable_issue"]
 
-    if vague and not (alive or thermal):
+    if issue or repair_listing or no_output:
+        return "YELLOW", ["repair_signal"]
+
+    if vague and not alive:
         return "YELLOW", ["vague_listing"]
 
-    return "YELLOW", ["default"]
+    return "RED", ["no_repair_signal"]
